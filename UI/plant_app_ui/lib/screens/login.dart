@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:plant_app_ui/screens/verification.dart';
+import 'package:get/get.dart';
+import 'package:plant_app_ui/widget.dart';
+import '../controllers/dashcontroller.dart';
+import '../controllers/databasecontroller.dart';
+
+import '../controllers/profilecontroller.dart';
+import '../model/usermodel.dart';
+import 'home.dart';
+import 'signupscreen.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,103 +17,116 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  // final _formKey = GlobalKey<FormState>();
   TextEditingController phoneNoController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  DatabaseController controller = DatabaseController();
+ @override
+  void initState() {
+    super.initState();
+    DashboardController controller = Get.put(DashboardController());
+    controller.tabIndex.value = 0; 
+  }
+  void successSnackBar() {
+    Get.snackbar("Success", "Logged In Successfully..",
+        backgroundColor:  const Color.fromRGBO(118, 152, 75, 1), snackPosition: SnackPosition.TOP);
+    Future.delayed(const Duration(seconds: 1), () {
+      Get.to(() => const HomeScreen());
+    });
+  }
+
+  void unsuccessSnackBar() {
+    Get.snackbar("Error", "Invalid Username or Password..",
+        backgroundColor: Colors.red, snackPosition: SnackPosition.TOP);
+  }
+
+  void submitButton() async {
+    // if (_formKey.currentState!.validate()) {
+      List<UserModel> userData = await controller.fetchUserData();
+
+      bool flag = false;
+      UserModel? loggedInUser;
+      for (int i = 0; i < userData.length; i++) {
+        if (userData[i].username == phoneNoController.text.trim() &&
+            userData[i].password == passwordController.text) {
+          flag = true;
+          loggedInUser = userData[i];
+        }
+      }
+      if (flag) {
+        Get.find<ProfileController>().setLoggedInUser(loggedInUser);
+        successSnackBar();
+      } else {
+        unsuccessSnackBar();
+      // }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 248, 248, 248),
-        body: SingleChildScrollView(
-          child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-          Container(
-            height: 32,
-            color: const Color.fromRGBO(123, 123, 123, 1),
-          ),
-          SvgPicture.asset("assets/login.svg",),
-          const SizedBox(
-            height: 15,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(25),
+        backgroundColor: const Color.fromARGB(255, 248, 248, 248),
+        body: Padding(
+          padding: const EdgeInsets.only(top: 150, left: 30, right: 30),
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   "Log in",
-                  style: TextStyle(
-                      fontFamily: 'poppins',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 30,
-                      height: 45 / 30,
-                      color: Color.fromRGBO(0, 0, 0, 1)),
+                  style: textStyleData(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 35,
+                  ),
                 ),
                 const SizedBox(
                   height: 30,
                 ),
-                TextField(
+                customTextField(
                   controller: phoneNoController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          borderSide: BorderSide(
-                              width: 1, color: Color.fromRGBO(204, 211, 196, 1))),
-                      prefixIcon: Icon(
-                        Icons.local_phone_outlined,
-                        size: 17,
-                        color: Color.fromRGBO(164, 164, 164, 1),
-                      ),
-                      hintText: "Mobile Number",
-                      hintStyle: TextStyle(
-                          fontFamily: 'inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 13,
-                          height: 15.73 / 13,
-                          color: Color.fromRGBO(164, 164, 164, 1))),
-                          keyboardType: TextInputType.number,
+                  prefixIcon: Icons.phone,
+                  hintText: "Enter your phone number", // optional
+                  color: Colors.grey, // optional
+                  keyboardType: TextInputType.phone, // optional
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                customTextField(
+                  obscureText: true,
+                  prefixIcon: Icons.hide_image_outlined,
+                  controller: passwordController,
+                  hintText: "Enter your password", // optional
+                  color: Colors.grey, // optional
+                  keyboardType: TextInputType.phone, // optional
                 ),
                 const SizedBox(
                   height: 60,
-                ),
-                GestureDetector(
+                ),             
+                  GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const Verification()),
-                    );
+                    submitButton();
                   },
-                  child: Container(
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      gradient: LinearGradient(
-                        colors: [
-                          Color.fromRGBO(62, 102, 24, 1),
-                          Color.fromRGBO(124, 180, 70, 1)
-                        ],
+                  child: buttonStyle(buttonText: "Login", context: context),
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "New User? Click Here To Register ",
+                      style: textStyleData1(12, 400, 18, [0, 0, 0, 1]),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Get.to(() => SignUpScreen());
+                      },
+                      child: Text(
+                        "Sign Up",
+                        style: textStyleData1(12, 900, 18, [0, 0, 0, 1]),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                            offset: Offset(0, 20),
-                            color: Color.fromRGBO(0, 0, 0, 0.15),
-                            blurRadius: 40,
-                            spreadRadius: 40)
-                      ],
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Log in",
-                          style: TextStyle(
-                              fontFamily: 'rubik',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 18,
-                              height: 32.4 / 18,
-                              color: Color.fromRGBO(255, 255, 255, 1)),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
                 const SizedBox(
                   height: 15,
@@ -121,8 +140,6 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
-                ],
-              ),
         ));
   }
 }

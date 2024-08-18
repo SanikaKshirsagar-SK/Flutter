@@ -9,7 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_slidable: ^3.1.1
+  flutter_staggered_grid_view: ^0.7.0
   flutter_svg: ^2.0.4
+  get: ^4.6.6
+  intl: ^0.19.0
+  path: ^1.9.0
+  sqflite: ^2.3.3+1
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -20,4 +27,17 @@ flutter:
   uses-material-design: true
   assets:
       - assets/
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-VariableFont_wght.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+    - family: kalam
+      fonts:
+        - asset: assets/fonts/Kalam-Regular.ttf
+
+
+        
   
